@@ -1,19 +1,12 @@
 import streamlit as st
 import random
 
-st.set_page_config(
-page_title="Number Guessing Game",
-page_icon="🎯"
-)
+st.set_page_config(page_title="Number Guessing Game", page_icon="🎯")
 
 st.title("🎯 Number Guessing Game")
 
-# ---------- INITIAL SETUP ----------
-
 if "game_started" not in st.session_state:
 st.session_state.game_started = False
-
-# ---------- START SCREEN ----------
 
 if not st.session_state.game_started:
 
@@ -41,18 +34,14 @@ if start_game:
         st.error("Please enter a valid positive number.")
 ```
 
-# ---------- GAME SCREEN ----------
-
 else:
 
 ```
 st.write(f"### Remaining Chances: {st.session_state.remaining}")
 
-# Show message
 if st.session_state.message:
-    st.write(st.session_state.message)
+    st.info(st.session_state.message)
 
-# Previous guesses
 if st.session_state.history:
     st.write("### Previous Guesses")
     st.write(", ".join(map(str, st.session_state.history)))
@@ -72,68 +61,54 @@ if (
 
     if submitted:
 
-        if not guess_text.isdigit():
+        if guess_text.isdigit():
 
-            st.session_state.message = (
-                "❌ Please enter a valid number."
-            )
+            guess = int(guess_text)
 
-            st.rerun()
+            if 1 <= guess <= 100:
 
-        guess = int(guess_text)
+                st.session_state.history.append(guess)
 
-        if guess < 1 or guess > 100:
+                if guess == st.session_state.secret_number:
 
-            st.session_state.message = (
-                "❌ Enter a number between 1 and 100."
-            )
+                    st.session_state.message = (
+                        "🎉 Congratulations! You guessed correctly!"
+                    )
 
-            st.rerun()
+                    st.session_state.game_over = True
 
-        st.session_state.history.append(guess)
+                else:
 
-        if guess == st.session_state.secret_number:
+                    st.session_state.remaining -= 1
 
-            st.session_state.message = (
-                "🎉 Congratulations! You guessed correctly!"
-            )
+                    if guess < st.session_state.secret_number:
 
-            st.session_state.game_over = True
+                        st.session_state.message = (
+                            "⬆️ Try a Higher Number"
+                        )
 
-            st.rerun()
+                    else:
 
-        st.session_state.remaining -= 1
+                        st.session_state.message = (
+                            "⬇️ Try a Lower Number"
+                        )
 
-        if guess < st.session_state.secret_number:
+                    if st.session_state.remaining == 0:
 
-            st.session_state.message = (
-                "⬆️ Try a Higher Number"
-            )
+                        st.session_state.message = (
+                            f"💀 Game Over! The secret number was "
+                            f"{st.session_state.secret_number}"
+                        )
+
+                        st.session_state.game_over = True
+
+                st.rerun()
+
+            else:
+                st.error("Enter a number between 1 and 100")
 
         else:
-
-            st.session_state.message = (
-                "⬇️ Try a Lower Number"
-            )
-
-        if st.session_state.remaining == 0:
-
-            st.session_state.message = (
-                f"💀 Game Over! The secret number was "
-                f"{st.session_state.secret_number}"
-            )
-
-            st.session_state.game_over = True
-
-        st.rerun()
-
-else:
-
-    if (
-        st.session_state.game_over
-        and st.session_state.remaining > 0
-    ):
-        st.balloons()
+            st.error("Please enter a valid number")
 
 if st.button("🔄 Restart Game"):
 
